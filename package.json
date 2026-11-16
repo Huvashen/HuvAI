@@ -3,16 +3,37 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "JARVIS Windows assistant: Phase 0 feasibility gate",
+  "description": "JARVIS local-first Windows assistant",
+  "main": "dist/desktop/main.cjs",
   "engines": {
-    "node": ">=24.0.0"
+    "node": "^24.15.0 || >=26.0.0"
   },
   "scripts": {
     "test": "node --test tests/*.test.ts",
     "feasibility": "node feasibility/cli.ts",
-    "preflight": "node feasibility/cli.ts preflight"
+    "preflight": "node feasibility/cli.ts preflight",
+    "build": "ng build desktop && node scripts/build-desktop.mjs",
+    "start": "npm run build && electron .",
+    "start:built": "electron .",
+    "typecheck": "tsc --noEmit -p tsconfig.main.json"
+  },
+  "dependencies": {
+    "@angular/common": "22.2.6",
+    "@angular/compiler": "22.2.6",
+    "@angular/core": "22.2.6",
+    "@angular/forms": "22.2.6",
+    "@angular/platform-browser": "22.2.6",
+    "rxjs": "^7.8.2",
+    "tslib": "^2.8.1"
   },
   "devDependencies": {
-    "@openai/codex": "0.169.0"
+    "@openai/codex": "0.169.0",
+    "@angular/build": "^22.2.0",
+    "@angular/cli": "^22.2.0",
+    "@angular/compiler-cli": "22.2.6",
+    "@types/node": "^24.0.0",
+    "electron": "^44.0.0",
+    "esbuild": "^0.25.0",
+    "typescript": "~6.0.0"
   }
 }

@@ -6,6 +6,7 @@
 - Follow the JARVIS PRD and work mode handoff linked in README.md. Phase 0 must pass before scaffolding the full desktop application.
 - Use a lean TypeScript modular monolith: Electron main for privileged services; Angular renderer for UI; shared typed contracts. Keep provider integrations, policy, and persistence separate.
 - Everyday conversation defaults to direct plan-backed ChatGPT chat. Codex is a specialist route for suitable demanding coding/development tasks, not the general conversation backend. Spreadsheet work should use the appropriate spreadsheet tools rather than automatically invoking Codex.
+- Product direction is a voice-first JARVIS assistant with an original moving 3D hologram as the primary interface, reacting to assistant state and audio. The current chat dashboard is a temporary testing console, not the final product UI. Finish backend/runtime capabilities and verification before further visual design work; keep renderer visuals separate from orchestration and tools.
 - Reuse existing implementations and avoid duplicate services. Explain the changes and checks in plain English.
 - R0 additional spending: no API-key billing fallback, purchased credits, paid provider, or automatic top-up. Block requests until plan-only spending is confirmed.
 - Never read unrelated repositories, change operating-system settings, install privileged services, or enable autostart during development without the required explicit approval.

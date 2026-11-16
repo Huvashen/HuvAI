@@ -1,0 +1,81 @@
+@if (state(); as s) {
+  @if (s.locked) {
+    <main class="locked"><div class="brand-mark">J</div><h1>JARVIS is locked</h1><p>Unlock Windows to continue your conversation.</p></main>
+  } @else {
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand"><span class="brand-mark">J</span><div><strong>JARVIS</strong><small>Your personal assistant</small></div></div>
+        <button class="new-chat" [disabled]="s.busy" (click)="setTab('chat'); act({action:'newConversation'})">＋ New conversation</button>
+        <nav aria-label="Main navigation">
+          <button [class.selected]="tab()==='chat'" (click)="setTab('chat')">Chat</button>
+          <button [class.selected]="tab()==='projects'" (click)="setTab('projects')">Projects</button>
+          <button [class.selected]="tab()==='activity'" (click)="setTab('activity')">Activity</button>
+          <button [class.selected]="tab()==='settings'" (click)="setTab('settings')">Settings</button>
+        </nav>
+        <div class="history-label">RECENT CONVERSATIONS</div>
+        <div class="history-list">
+          @for (conversation of s.conversations; track conversation.id) {
+            <button [class.current]="conversation.id===s.activeConversationId" [disabled]="s.busy"
+              (click)="setTab('chat'); act({action:'selectConversation',id:conversation.id})">{{conversation.title}}</button>
+          } @empty { <p class="quiet">Your conversations will appear here.</p> }
+        </div>
+        <div class="sidebar-status"><span class="status-dot" [class.busy]="s.busy"></span>{{s.busy ? 'Working…' : 'Ready'}}<small>Microphone inactive</small></div>
+      </aside>
+      <main class="main-panel">
+        <header><div><h1>{{tab()==='chat' ? 'Conversation' : tab()==='projects' ? 'Projects' : tab()==='activity' ? 'Activity' : 'Settings'}}</h1>
+          <p>Local first. Always within reach.</p></div><span class="provider-chip">ChatGPT · Default</span></header>
+        @if (error()) { <div class="error-banner" role="alert">{{error()}}<button aria-label="Dismiss error" (click)="error.set('')">×</button></div> }
+        @if (tab()==='chat') {
+          <section #messages class="messages" aria-live="polite" aria-label="Conversation messages">
+            @for (message of s.messages; track message.id) {
+              <article class="message" [class.user-message]="message.role==='user'">
+                <div class="message-label">{{message.role==='user' ? 'YOU' : 'JARVIS'}}</div>
+                <div class="message-content">{{message.content || (message.status==='streaming' ? 'Thinking…' : 'No response text.')}}</div>
+                @if (message.status==='interrupted' || message.status==='error') { <small class="quiet">{{message.status==='interrupted' ? 'Response stopped' : 'Response did not complete'}}</small> }
+              </article>
+            } @empty {
+              <div class="welcome"><div class="welcome-orb" [class.working]="s.busy">J</div><h2>What’s on your mind?</h2>
+                <p>Ask a question, work through an idea, or make a plan.</p>
+                <div class="suggestions"><button (click)="composer='Help me plan my day.'">Plan my day</button>
+                  <button (click)="composer='Help me understand a technical concept.'">Explain something</button>
+                  <button (click)="composer='Help me think through an idea.'">Explore an idea</button></div>
+              </div>
+            }
+          </section>
+          <div class="composer-wrap">
+            @if (!s.signedIn || !s.settings.planOnlyConfirmed) { <p class="setup-note">Finish ChatGPT setup in <button (click)="setTab('settings')">Settings</button> to start chatting.</p> }
+            <form class="composer" (ngSubmit)="send()">
+              <textarea name="prompt" [(ngModel)]="composer" placeholder="Ask JARVIS anything…" rows="3" maxlength="16000"
+                [disabled]="s.busy" aria-label="Message to JARVIS"></textarea>
+              <div class="composer-footer"><span>{{s.settings.model}}</span>
+                @if (s.busy) { <button type="button" class="primary" (click)="act({action:'cancel'})">Stop</button> }
+                @else { <button type="submit" class="primary" [disabled]="!composer.trim() || !s.signedIn || !s.settings.planOnlyConfirmed">Send ↑</button> }
+              </div>
+            </form><p class="footnote">Closing this window keeps JARVIS in your system tray. Voice listening is not active in this build.</p>
+          </div>
+        }
+        @if (tab()==='settings') {
+          <section class="page-scroll"><div class="settings-card"><h2>ChatGPT connection</h2>
+            <p>{{s.signedIn ? 'Signed in with ChatGPT.' : 'Connect the ChatGPT account you want JARVIS to use.'}} {{s.planGranted ? 'Plan permission granted.' : ''}}</p>
+            <div class="button-row"><button class="primary" [disabled]="s.busy" (click)="act({action:'login'})">Continue with ChatGPT</button>
+              <button (click)="act({action:'openUsage'})">Manage usage</button></div>
+          </div><div class="settings-card"><h2>Plan and preferences</h2><p>Everyday chat uses ChatGPT directly. Codex remains a specialist integration for later workflows.</p>
+            <label class="field">Model<input [(ngModel)]="draft.model" maxlength="100"></label>
+            <label class="check"><input type="checkbox" [(ngModel)]="draft.planOnlyConfirmed">I have disabled JARVIS credit spending in ChatGPT usage settings.</label>
+            <p class="quiet">JARVIS requires this confirmation before sending requests. Update it if you change your spending settings.</p>
+            <label class="check"><input type="checkbox" [(ngModel)]="draft.startAtLogin" [disabled]="!s.packaged">Start JARVIS when I sign in to Windows.</label>
+            @if (!s.packaged) { <p class="quiet">Windows startup becomes available after the app is packaged and installed.</p> }
+            <button class="primary" [disabled]="s.busy" (click)="act({action:'settings',settings:draft})">Save preferences</button>
+          </div><div class="settings-card"><h2>Local history</h2><p>Conversations and preferences are stored on this PC. Account credentials use Windows protection.</p>
+            <button class="danger" [disabled]="s.busy" (click)="clearHistory()">Delete conversation history</button></div></section>
+        }
+        @if (tab()==='activity') {
+          <section class="page-scroll">@for (item of s.activity; track item.id) { <article class="activity-item"><small>{{item.createdAt}}</small><p>{{item.message}}</p></article> }
+            @empty { <div class="empty-page"><h2>You’re all caught up</h2><p>Connection updates and important notices will appear here.</p></div> }</section>
+        }
+        @if (tab()==='projects') { <section class="empty-page"><h2>Your projects, with your permission</h2>
+          <p>Scoped project approvals and patch review come in the repository-assistant feature. Project access is currently disabled.</p></section> }
+      </main>
+    </div>
+  }
+} @else { <main class="locked"><div class="brand-mark">J</div><h1>Starting JARVIS…</h1></main> }

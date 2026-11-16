@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "types": ["node"], "noEmit": true },
+  "include": ["src/**/*.ts", "apps/desktop/src/main/**/*.ts", "apps/desktop/src/preload/**/*.ts"]
+}

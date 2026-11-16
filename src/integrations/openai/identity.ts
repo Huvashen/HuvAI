@@ -2,9 +2,11 @@ import { createPublicKey, verify, type JsonWebKey } from 'node:crypto';
 import { JarvisError } from '../../shared/errors.ts';
 import { AUTH_ORIGIN } from './http.ts';
 
+export interface OpenAIJwk extends JsonWebKey { kid?: string; use?: string; alg?: string }
+
 export interface Identity { subject: string; email?: string }
 
-export function validateIdentity(token: string, keys: JsonWebKey[], clientId: string,
+export function validateIdentity(token: string, keys: OpenAIJwk[], clientId: string,
   nonce: string, previousSubject?: string, now = Date.now() / 1000): Identity {
   try {
     const parts = token.split('.');

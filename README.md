@@ -1,6 +1,28 @@
 # HuvAI / JARVIS
 
-Local-first Windows 11 assistant, built against the approved JARVIS requirements. The **Phase 0 technical feasibility probes have passed**: direct ChatGPT chat, a Codex app-server turn, and Windows local speech API checks. The tray app, Angular UI and continuous wake-word pipeline have not been built. Audible confirmation and sustained voice/resource benchmarks remain acceptance checks.
+Local-first Windows 11 assistant, built against the approved JARVIS requirements. The **Phase 0 technical feasibility probes have passed**: direct ChatGPT chat, a Codex app-server turn, and Windows local speech API checks. The desktop shell passes TypeScript checking and its Angular/Electron build; interactive window/tray/chat verification is pending. Continuous wake-word listening is not implemented yet. Audible confirmation and sustained voice/resource benchmarks remain acceptance checks.
+
+## Desktop shell development
+
+**Interface direction:** JARVIS is a voice-first assistant with a moving, sound-reactive 3D hologram as its eventual primary interface. The current chat/dashboard screen is a temporary console for backend testing, settings and troubleshooting. Visual redesign is paused until runtime capabilities are implemented and verified. The hologram will consume assistant-state and audio events; AI, permissions, tools and storage stay independent of that visual layer.
+
+The Electron/Angular shell implementation is on `feature/desktop-shell`. Dependencies, TypeScript checking and its first build have succeeded. Target-PC window/tray/chat verification is pending. From the repository root in the normal VS Code terminal:
+
+```powershell
+npm install
+npm run typecheck
+npm start
+```
+
+`npm start` builds Angular and the Electron main/preload bundles, then opens JARVIS. The first launch may download the Electron runtime; later launches reuse it. The terminal stays occupied while the desktop process is running. `npm run start:built` opens the last built version without rebuilding. This is a desktop project; `aspire run` is not its launcher.
+
+The development app restores the same protected JARVIS session used by the CLI; tokens are not copied into another credential store or exposed to Angular. Open Settings, review the model and confirm JARVIS credit spending is disabled in ChatGPT settings, then save preferences. Everyday chat uses the direct ChatGPT plan route; Codex is not started for general chat. Expired sessions currently require another Continue with ChatGPT sign-in; automatic token renewal remains pending.
+
+The shell includes single-instance startup, a tray menu, close-to-hide behavior, streamed/cancellable chat, SQLite conversation/settings/activity storage, Windows/in-app error notices and lock-screen suppression of conversation content. Development data lives under ignored `.jarvis/desktop`; credentials and the host ID remain in `.jarvis`. Installed-app storage will use Electron's user-data directory. Windows startup is opt-in and available only for the packaged app; development does not register autostart.
+
+Closing the window hides it. Click the tray icon to reopen it; choose **Quit JARVIS** to end the process. The microphone is inactive in this shell slice. Continuous voice, repository permissions/patch approvals, research, specialist routing, token renewal and installer hardening are later implementation slices. The Projects page explicitly disables repository access until its permission broker is implemented.
+
+See [desktop shell verification](docs/desktop-shell-status.md) for current implementation and checks.
 
 ## Requirements
 
