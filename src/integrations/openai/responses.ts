@@ -63,13 +63,22 @@ export async function proveInference(session: Session, creditsDisabledConfirmed:
   const model = catalog.models?.find((item: { visibility: string; slug: string }) =>
     item.visibility === 'list' && typeof item.slug === 'string')?.slug;
   if (!model) throw new JarvisError('NO_MODELS', 'No visible model was returned for this account.');
+  await streamChat(session, model, [{ role: 'user', content: 'Say exactly: JARVIS feasibility check passed.' }], creditsDisabledConfirmed, delta, signal);
+  return model;
+}
+
+export async function streamChat(session: Session, model: string,
+  messages: { role: 'user' | 'assistant'; content: string }[], creditsDisabledConfirmed: boolean,
+  delta: (text: string) => void, signal?: AbortSignal) {
+  requirePlanOnly(session.scopes, creditsDisabledConfirmed);
+  if (session.expiresAt <= Date.now()) throw new JarvisError('AUTH_REQUIRED', 'Session expired. Sign in again.');
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,100}$/.test(model)) throw new JarvisError('INVALID_MODEL', 'Choose a valid model.');
   const response = await request(`${RESOURCE}/responses`, { method: 'POST',
     signal: AbortSignal.any([AbortSignal.timeout(90_000), ...(signal ? [signal] : [])]),
-    headers: { ...headers, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model, input: [{ role: 'user', content: 'Say exactly: JARVIS feasibility check passed.' }],
+    headers: { Authorization: `Bearer ${session.accessToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model, input: messages,
       store: false, stream: true }),
   }, 90_000);
   if (!response.body) throw new JarvisError('INVALID_STREAM', 'The response has no event stream.');
   await consumeResponse(response.body, delta);
-  return model;
 }

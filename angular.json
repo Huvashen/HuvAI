@@ -1,0 +1,26 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "cli": { "analytics": false },
+  "projects": {
+    "desktop": {
+      "projectType": "application",
+      "root": "apps/desktop/src/renderer",
+      "sourceRoot": "apps/desktop/src/renderer",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "outputPath": "dist/renderer",
+            "browser": "apps/desktop/src/renderer/main.ts",
+            "index": "apps/desktop/src/renderer/index.html",
+            "tsConfig": "apps/desktop/src/renderer/tsconfig.app.json",
+            "styles": ["apps/desktop/src/renderer/styles.css"],
+            "optimization": { "scripts": true, "styles": { "minify": true, "inlineCritical": false }, "fonts": false },
+            "outputHashing": "all"
+          }
+        }
+      }
+    }
+  }
+}
